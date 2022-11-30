@@ -1,0 +1,22 @@
+body .contentLayout-BaseContainer {
+  max-width: 100%;
+  overflow: hidden;
+}
+body .contentLayout-BaseContainer .notcritical {
+  padding: 0!important;
+}
+body .contentLayout-BaseContainer .notcritical > .container {
+  margin: 0!important;
+  padding: 0!important;
+  max-width: none!important;
+}
+body .contentLayout-BaseContainer .notcritical > .container .widgetcontainer {
+  margin-bottom: 0;
+}
+body .contentLayout-BaseContainer .notcritical > .container > .row:not(:nth-child(2)) {
+  display: none;
+}
+body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2) > div.col-sm-12.order-1.col-md-9.rightcol > h1 {
+  display: none;
+}
+/*# sourceMappingURL=common.css.map */
