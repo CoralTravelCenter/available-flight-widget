@@ -26,6 +26,10 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   font-size: 1.15vw;
   font-weight: normal;
 }
+.available-flight-widget,
+.available-flight-widget * {
+  box-sizing: border-box;
+}
 @media screen and (min-width: 1370px) {
   .available-flight-widget {
     font-size: 15.755px;
@@ -125,7 +129,12 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
 .available-flight-widget .body .data-column .scrollable {
   position: relative;
   overflow: hidden;
-  height: 6em;
+  max-height: 6em;
+}
+@media screen and (max-width: 768px) {
+  .available-flight-widget .body .data-column .scrollable {
+    max-height: 9em;
+  }
 }
 .available-flight-widget .body .data-column .scrollable.ps--active-y {
   padding-right: 1em;
@@ -163,4 +172,3 @@ html,
 body {
   background-color: #f1f7fc !important;
 }
-/*# sourceMappingURL=index.css.map */

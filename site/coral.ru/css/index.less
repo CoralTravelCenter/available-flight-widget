@@ -3,6 +3,7 @@
 @pad-base: 1em;
 
 .available-flight-widget {
+	.bbox;
 	width: 100%;
 	max-width: @wide-breakpoint;
 	margin: auto;
@@ -90,7 +91,10 @@
 			.scrollable {
 				position: relative;
 				overflow: hidden;
-				height: 6em;
+				max-height: 6em;
+				@media screen and (max-width: @mobile-breakpoint) {
+					max-height: 9em;
+				}
 				&.ps--active-y {
 					padding-right: @pad-base;
 				}

@@ -52,6 +52,19 @@ responsiveHandler = (query, match_handler, unmatch_handler) ->
     if layout.matches then match_handler() else unmatch_handler()
     layout
 
+observeElementProp = (el, prop, callback) ->
+    proto = Object.getPrototypeOf(el)
+    if proto.hasOwnProperty(prop)
+        descr = Object.getOwnPropertyDescriptor proto, prop
+        Object.defineProperty el, prop,
+            get: () -> descr.get.apply this, arguments
+            set: (v) ->
+                oldv = this[prop]
+                descr.set.apply this, arguments
+                newv = v
+                setTimeout(callback.bind(this, newv, oldv), 0) if newv != oldv
+
+
 ASAP ->
     $ctx = $('.available-flight-widget')
     responsiveHandler '(max-width: 768px)',
@@ -62,6 +75,19 @@ ASAP ->
         ->
             $('.head', $ctx).append($('.head-item', $ctx))
 
-    preload 'https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/perfect-scrollbar.min.js', ->
+    nodes_array = $('.geolocation-list li').map (idx, li) ->
+        $li = $(li)
+        $('<div class="item"></div>').text($li.text()).attr('data-departureid': $li.attr('data-departureid')).get(0)
+    $('.data-column.depart-from .scrollable').empty().append nodes_array
+
+    libs = [
+        'https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/perfect-scrollbar.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.3/jquery.scrollTo.min.js'
+    ]
+    preload libs, ->
         $('.scrollable', $ctx).each (idx, el) ->
-            new PerfectScrollbar(el)
+            new PerfectScrollbar(el, { minScrollbarLength: 20 })
+
+    observeElementProp $('input.packageSearch__departureInput').get(0), 'value', (new_destination) ->
+        if new_destination
+            1

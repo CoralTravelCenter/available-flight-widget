@@ -1,4 +1,4 @@
-var responsiveHandler;
+var observeElementProp, responsiveHandler;
 
 window.ASAP || (window.ASAP = (function() {
   var callall, fns;
@@ -122,8 +122,30 @@ responsiveHandler = function(query, match_handler, unmatch_handler) {
   return layout;
 };
 
+observeElementProp = function(el, prop, callback) {
+  var descr, proto;
+  proto = Object.getPrototypeOf(el);
+  if (proto.hasOwnProperty(prop)) {
+    descr = Object.getOwnPropertyDescriptor(proto, prop);
+    return Object.defineProperty(el, prop, {
+      get: function() {
+        return descr.get.apply(this, arguments);
+      },
+      set: function(v) {
+        var newv, oldv;
+        oldv = this[prop];
+        descr.set.apply(this, arguments);
+        newv = v;
+        if (newv !== oldv) {
+          return setTimeout(callback.bind(this, newv, oldv), 0);
+        }
+      }
+    });
+  }
+};
+
 ASAP(function() {
-  var $ctx;
+  var $ctx, libs, nodes_array;
   $ctx = $('.available-flight-widget');
   responsiveHandler('(max-width: 768px)', function() {
     var $headitems;
@@ -134,9 +156,25 @@ ASAP(function() {
   }, function() {
     return $('.head', $ctx).append($('.head-item', $ctx));
   });
-  return preload('https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/perfect-scrollbar.min.js', function() {
+  nodes_array = $('.geolocation-list li').map(function(idx, li) {
+    var $li;
+    $li = $(li);
+    return $('<div class="item"></div>').text($li.text()).attr({
+      'data-departureid': $li.attr('data-departureid')
+    }).get(0);
+  });
+  $('.data-column.depart-from .scrollable').empty().append(nodes_array);
+  libs = ['https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/perfect-scrollbar.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.3/jquery.scrollTo.min.js'];
+  preload(libs, function() {
     return $('.scrollable', $ctx).each(function(idx, el) {
-      return new PerfectScrollbar(el);
+      return new PerfectScrollbar(el, {
+        minScrollbarLength: 20
+      });
     });
+  });
+  return observeElementProp($('input.packageSearch__departureInput').get(0), 'value', function(new_destination) {
+    if (new_destination) {
+      return 1;
+    }
   });
 });
