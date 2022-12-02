@@ -1,4 +1,4 @@
-var observeElementProp, responsiveHandler;
+var $ctx, LOCAL_GET_CACHE, ajaxGet, isPreferredDestinationAvailable, observeElementProp, rebuildAirportsListWithData, rebuildDestinationsListWithData, responsiveHandler, selectDestinationItem, selectOriginItem, updateSelectionInfo, updateSelectionWithOrigin;
 
 window.ASAP || (window.ASAP = (function() {
   var callall, fns;
@@ -144,8 +144,152 @@ observeElementProp = function(el, prop, callback) {
   }
 };
 
+isPreferredDestinationAvailable = function(list, prefer) {
+  prefer || (prefer = $('.data-column.destination-to').closest('[data-preferred-destination]').attr('data-preferred-destination'));
+  return list.find(function(item) {
+    return item.Name === prefer;
+  });
+};
+
+updateSelectionWithOrigin = function(origin_name) {
+  var $origin_item;
+  $origin_item = $($('.data-column.depart-from .item').toArray().find(function(item) {
+    return $(item).text() === origin_name;
+  }));
+  return selectOriginItem($origin_item);
+};
+
+selectOriginItem = function($item, dont_fallback_to_moscow) {
+  $item = $($item);
+  $item.siblings().removeClass('selected');
+  ajaxGet('https://www.coral.ru/v1/geography/tocountryfilter', {
+    areaid: $item.attr('data-departureid')
+  }).then(function(response) {
+    if (isPreferredDestinationAvailable(response)) {
+      if (dont_fallback_to_moscow) {
+        $item.addClass('selected');
+      } else {
+        $item.addClass('selected');
+        $item.closest('.scrollable').scrollTo($item, 500, {
+          offset: -30,
+          complete: function() {
+            return $item.addClass('selected');
+          }
+        });
+      }
+      return rebuildDestinationsListWithData(response);
+    } else {
+      if (dont_fallback_to_moscow) {
+        $item.addClass('selected');
+        return rebuildDestinationsListWithData(response);
+      } else {
+        return setTimeout(function() {
+          return selectOriginItem($('.data-column.depart-from .item[data-departureid="2671"]'));
+        }, 0);
+      }
+    }
+  });
+  return updateSelectionInfo();
+};
+
+selectDestinationItem = function($item, dont_scroll) {
+  var req_params;
+  $item = $($item);
+  $item.siblings().removeClass('selected');
+  if (dont_scroll) {
+    $item.addClass('selected');
+  } else {
+    $item.closest('.scrollable').scrollTo($item, 500, {
+      offset: -30,
+      complete: function() {
+        return $item.addClass('selected');
+      }
+    });
+  }
+  req_params = {
+    fromAreaId: $('.data-column.depart-from .item.selected').attr('data-departureid'),
+    toCountryId: $item.attr('data-id')
+  };
+  ajaxGet('https://www.coral.ru/v1/flight/availabledate', req_params).then(function(response) {
+    return rebuildAirportsListWithData(response.Result);
+  });
+  return updateSelectionInfo();
+};
+
+rebuildDestinationsListWithData = function(list) {
+  var $block, $container, prefer, ref;
+  $('.data-column.destination-airport-closest-date .scrollable').empty();
+  $block = $('.data-column.destination-to');
+  $container = $block.find('.scrollable');
+  $container.empty();
+  $container.append(list.map(function(item_data) {
+    return "<div class='item' data-id='" + item_data.Id + "'>" + item_data.Name + "</div>";
+  }));
+  if ((ref = $container.get(0).perfectscrollbar) != null) {
+    ref.update();
+  }
+  prefer = $block.closest('[data-preferred-destination]').attr('data-preferred-destination');
+  return selectDestinationItem($container.find('.item').toArray().find(function(item) {
+    return $(item).text() === prefer;
+  }));
+};
+
+rebuildAirportsListWithData = function(list) {
+  var $container, ref;
+  $container = $('.data-column.destination-airport-closest-date .scrollable');
+  $container.empty();
+  $container.append(list.map(function(item_data) {
+    return "<div class='item dbl'><span>" + item_data.ToAreaName + "</span><span>" + (moment(Number(item_data.FlightDate.replace(/\D/g, ''))).format('DD.MM.YYYY')) + "</span></div>";
+  }));
+  return (ref = $container.get(0).perfectscrollbar) != null ? ref.update() : void 0;
+};
+
+updateSelectionInfo = function() {
+  return setTimeout(function() {
+    var $container, items_html;
+    $container = $ctx.find('.foot .selection-info').empty();
+    items_html = $ctx.find('.data-column .item.selected').toArray().map(function(item) {
+      var $item;
+      $item = $(item);
+      if ($item.children().length) {
+        return "<span>" + ($item.children().map(function(idx, el) {
+          return $(el).text();
+        }).toArray().join(', ')) + "</span>";
+      } else {
+        return "<span>" + ($item.text()) + "</span>";
+      }
+    }).join('');
+    return $container.append(items_html);
+  }, 1000);
+};
+
+LOCAL_GET_CACHE = {
+  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2671': '[{"Id":1,"Name":"Турция"},{"Id":3,"Name":"Россия"},{"Id":12,"Name":"Египет"},{"Id":31,"Name":"ОАЭ"},{"Id":33,"Name":"Таиланд"},{"Id":282,"Name":"Бахрейн"},{"Id":52,"Name":"Индия"},{"Id":35,"Name":"Мальдивы"},{"Id":40,"Name":"Шри-Ланка"},{"Id":60,"Name":"Танзания"},{"Id":41,"Name":"Вьетнам"},{"Id":39,"Name":"Сейшелы"},{"Id":63,"Name":"Маврикий"},{"Id":278,"Name":"Абхазия"},{"Id":7,"Name":"Азербайджан"},{"Id":5,"Name":"Армения"},{"Id":8,"Name":"Беларусь"},{"Id":49,"Name":"Узбекистан"},{"Id":36,"Name":"Доминиканская Республика"},{"Id":98,"Name":"Мексика"},{"Id":38,"Name":"Индонезия"},{"Id":72,"Name":"Андорра"},{"Id":42,"Name":"Испания"},{"Id":18,"Name":"Италия"},{"Id":216,"Name":"Кипр"},{"Id":108,"Name":"Хорватия"},{"Id":10,"Name":"Болгария"},{"Id":80,"Name":"Черногория"},{"Id":48,"Name":"Куба"}]',
+  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2328': '[{"Id":3,"Name":"Россия"},{"Id":278,"Name":"Абхазия"}]',
+  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2449': '[{"Id":1,"Name":"Турция"},{"Id":3,"Name":"Россия"},{"Id":12,"Name":"Египет"},{"Id":31,"Name":"ОАЭ"},{"Id":33,"Name":"Таиланд"},{"Id":282,"Name":"Бахрейн"},{"Id":52,"Name":"Индия"},{"Id":35,"Name":"Мальдивы"},{"Id":40,"Name":"Шри-Ланка"},{"Id":39,"Name":"Сейшелы"},{"Id":63,"Name":"Маврикий"},{"Id":278,"Name":"Абхазия"},{"Id":7,"Name":"Азербайджан"},{"Id":5,"Name":"Армения"},{"Id":8,"Name":"Беларусь"},{"Id":49,"Name":"Узбекистан"},{"Id":38,"Name":"Индонезия"}]',
+  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2671&toCountryId=1': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area63","ToAreaName":"Стамбул (Istanbul)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area5","ToAreaName":"Анталья (Antalya)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area26","ToAreaName":"Измир (Izmir)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area3264","ToAreaName":"Даламан (Dalaman)"},{"FlightDate":"\\/Date(1672185600000)\\/","ToAreaId":"Area44","ToAreaName":"Кайсери (Kayseri)"},{"FlightDate":"\\/Date(1672272000000)\\/","ToAreaId":"Area14","ToAreaName":"Эрзурум (Erzurum)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area1","ToAreaName":"Бодрум (Bodrum)"}],"ErrorMessage":null}',
+  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2671&toCountryId=35': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area271","ToAreaName":"Мале (Male)"}],"ErrorMessage":null}',
+  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2449&toCountryId=35': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area271","ToAreaName":"Мале (Male)"}],"ErrorMessage":null}'
+};
+
+ajaxGet = function(endpoint, req_params) {
+  var $promise, request_uri;
+  $promise = $.Deferred();
+  request_uri = endpoint + '?' + $.param(req_params);
+  if (LOCAL_GET_CACHE[request_uri]) {
+    $promise.resolve(typeof LOCAL_GET_CACHE[request_uri] === 'string' ? JSON.parse(LOCAL_GET_CACHE[request_uri]) : LOCAL_GET_CACHE[request_uri]);
+  } else {
+    $.ajax(request_uri).then(function(response) {
+      return $promise.resolve(response);
+    });
+  }
+  return $promise;
+};
+
+$ctx = null;
+
 ASAP(function() {
-  var $ctx, libs, nodes_array;
+  var $libsReady, libs, nodes_array;
   $ctx = $('.available-flight-widget');
   responsiveHandler('(max-width: 768px)', function() {
     var $headitems;
@@ -165,16 +309,31 @@ ASAP(function() {
   });
   $('.data-column.depart-from .scrollable').empty().append(nodes_array);
   libs = ['https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/perfect-scrollbar.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.3/jquery.scrollTo.min.js'];
+  $libsReady = $.Deferred();
   preload(libs, function() {
-    return $('.scrollable', $ctx).each(function(idx, el) {
-      return new PerfectScrollbar(el, {
+    return $libsReady.resolve();
+  });
+  observeElementProp($('input.packageSearch__departureInput').get(0), 'value', function(new_origin) {
+    if (new_origin) {
+      return updateSelectionWithOrigin(new_origin);
+    }
+  });
+  return $.when($libsReady).done(function() {
+    var ref;
+    $('.scrollable', $ctx).each(function(idx, el) {
+      return el.perfectscrollbar = new PerfectScrollbar(el, {
         minScrollbarLength: 20
       });
     });
-  });
-  return observeElementProp($('input.packageSearch__departureInput').get(0), 'value', function(new_destination) {
-    if (new_destination) {
-      return 1;
-    }
+    updateSelectionWithOrigin((ref = window.global.getActiveDeparture()) != null ? ref.name : void 0);
+    $(document).on('click', '.data-column.depart-from .item', function(e) {
+      return selectOriginItem(this, 'dont_fallback');
+    });
+    return $(document).on('click', '.data-column.destination-to .item', function(e) {
+      var $this;
+      $this = $(this);
+      $this.closest('.data-column').attr('data-preferred-destination', $this.text());
+      return selectDestinationItem($this, 'dont-scroll');
+    });
   });
 });

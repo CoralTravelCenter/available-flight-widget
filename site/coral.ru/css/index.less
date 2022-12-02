@@ -122,7 +122,52 @@
 		}
 	}
 	.foot {
-
+		background-color: white;
+		padding: 0 @pad-base @pad-base;
+		border-radius: 0 0 @pad-base @pad-base;
+		font-weight: bold;
+		.pad {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding-top: @pad-base;
+			border-top: 1px solid #dedede;
+			.selection-info-comp {
+				display: flex;
+				align-items: baseline;
+				.label {
+					margin-right: 1em;
+				}
+				.selection-info {
+					display: flex;
+					align-items: center;
+					>* {
+						display: inline-flex;
+						align-items: center;
+						&:nth-child(n+2) {
+							&:before {
+								content: '>';
+								margin: 0 @pad-base/2;
+								font-size: 1.5em;
+								font-weight: normal;
+							}
+						}
+					}
+				}
+			}
+			[data-action='select-tour'] {
+				.interactive;
+				.flex-center;
+				line-height: 1;
+				height: 2.6em;
+				padding: 0 2em;
+				border-radius: @pad-base / 2;
+				color: white;
+				background-color: #F0AB00;
+				border: 0;
+			}
+		}
 	}
 
 }

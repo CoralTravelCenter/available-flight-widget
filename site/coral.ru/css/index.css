@@ -165,6 +165,64 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   pointer-events: none;
   background-color: #EAF3FB;
 }
+.available-flight-widget .foot {
+  background-color: white;
+  padding: 0 1em 1em;
+  border-radius: 0 0 1em 1em;
+  font-weight: bold;
+}
+.available-flight-widget .foot .pad {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1em;
+  border-top: 1px solid #dedede;
+}
+.available-flight-widget .foot .pad .selection-info-comp {
+  display: flex;
+  align-items: baseline;
+}
+.available-flight-widget .foot .pad .selection-info-comp .label {
+  margin-right: 1em;
+}
+.available-flight-widget .foot .pad .selection-info-comp .selection-info {
+  display: flex;
+  align-items: center;
+}
+.available-flight-widget .foot .pad .selection-info-comp .selection-info > * {
+  display: inline-flex;
+  align-items: center;
+}
+.available-flight-widget .foot .pad .selection-info-comp .selection-info > *:nth-child(n+2):before {
+  content: '>';
+  margin: 0 0.5em;
+  font-size: 1.5em;
+  font-weight: normal;
+}
+.available-flight-widget .foot .pad [data-action='select-tour'] {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  height: 2.6em;
+  padding: 0 2em;
+  border-radius: 0.5em;
+  color: white;
+  background-color: #F0AB00;
+  border: 0;
+}
+.available-flight-widget .foot .pad [data-action='select-tour']:active {
+  -webkit-transform: translateY(2px);
+  -moz-transform: translateY(2px);
+  -ms-transform: translateY(2px);
+  -o-transform: translateY(2px);
+  transform: translateY(2px);
+}
 .ps__rail-y {
   opacity: 1!important;
 }
