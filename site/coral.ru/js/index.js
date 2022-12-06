@@ -380,7 +380,8 @@ ASAP(function() {
     var ref;
     $('.scrollable', $ctx).each(function(idx, el) {
       return el.perfectscrollbar = new PerfectScrollbar(el, {
-        minScrollbarLength: 20
+        minScrollbarLength: 20,
+        wheelPropagation: false
       });
     });
     updateSelectionWithOrigin((ref = window.global.getActiveDeparture()) != null ? ref.name : void 0);

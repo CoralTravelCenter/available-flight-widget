@@ -221,7 +221,7 @@ ASAP ->
 
     $.when($libsReady).done ->
         $('.scrollable', $ctx).each (idx, el) ->
-            el.perfectscrollbar = new PerfectScrollbar(el, { minScrollbarLength: 20 })
+            el.perfectscrollbar = new PerfectScrollbar(el, { minScrollbarLength: 20, wheelPropagation: false })
         updateSelectionWithOrigin window.global.getActiveDeparture()?.name
 
         $(document).on 'click', '.data-column.depart-from .item', (e) ->
