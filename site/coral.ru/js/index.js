@@ -1,4 +1,4 @@
-var $ctx, LOCAL_GET_CACHE, ajaxGet, isPreferredDestinationAvailable, observeElementProp, rebuildAirportsListWithData, rebuildDestinationsListWithData, responsiveHandler, selectDestinationItem, selectOriginItem, updateSelectionInfo, updateSelectionWithOrigin;
+var $ctx, LOCAL_GET_CACHE, ajaxGet, fetchDestinationWithFallback, isPreferredDestinationAvailable, observeElementProp, rebuildAirportsListWithData, rebuildDestinationsListWithData, responsiveHandler, selectAirportListItem, selectDestinationItem, selectOriginItem, updateSelectionInfo, updateSelectionWithOrigin;
 
 window.ASAP || (window.ASAP = (function() {
   var callall, fns;
@@ -194,6 +194,7 @@ selectOriginItem = function($item, dont_fallback_to_moscow) {
 
 selectDestinationItem = function($item, dont_scroll) {
   var req_params;
+  rebuildAirportsListWithData([]);
   $item = $($item);
   $item.siblings().removeClass('selected');
   if (dont_scroll) {
@@ -216,8 +217,24 @@ selectDestinationItem = function($item, dont_scroll) {
   return updateSelectionInfo();
 };
 
+selectAirportListItem = function($item, dont_scroll) {
+  $item = $($item);
+  $item.siblings().removeClass('selected');
+  if (dont_scroll) {
+    $item.addClass('selected');
+  } else {
+    $item.closest('.scrollable').scrollTo($item, 500, {
+      offset: -30,
+      complete: function() {
+        return $item.addClass('selected');
+      }
+    });
+  }
+  return updateSelectionInfo();
+};
+
 rebuildDestinationsListWithData = function(list) {
-  var $block, $container, prefer, ref;
+  var $block, $container, prefer, preferred_item, ref;
   $('.data-column.destination-airport-closest-date .scrollable').empty();
   $block = $('.data-column.destination-to');
   $container = $block.find('.scrollable');
@@ -229,26 +246,36 @@ rebuildDestinationsListWithData = function(list) {
     ref.update();
   }
   prefer = $block.closest('[data-preferred-destination]').attr('data-preferred-destination');
-  return selectDestinationItem($container.find('.item').toArray().find(function(item) {
+  preferred_item = $container.find('.item').toArray().find(function(item) {
     return $(item).text() === prefer;
-  }));
+  });
+  if (preferred_item) {
+    return selectDestinationItem(preferred_item);
+  }
 };
 
 rebuildAirportsListWithData = function(list) {
-  var $container, ref;
+  var $container, items, ref;
   $container = $('.data-column.destination-airport-closest-date .scrollable');
   $container.empty();
-  $container.append(list.map(function(item_data) {
-    return "<div class='item dbl'><span>" + item_data.ToAreaName + "</span><span>" + (moment(Number(item_data.FlightDate.replace(/\D/g, ''))).format('DD.MM.YYYY')) + "</span></div>";
-  }));
-  return (ref = $container.get(0).perfectscrollbar) != null ? ref.update() : void 0;
+  items = list.map(function(item_data) {
+    return "<div class='item dbl' data-toareaid='" + item_data.ToAreaId + "' data-flight-timestamp='" + (item_data.FlightDate.replace(/\D/g, '')) + "'><span>" + item_data.ToAreaName + "</span><span>" + (moment(Number(item_data.FlightDate.replace(/\D/g, ''))).format('DD.MM.YYYY')) + "</span></div>";
+  });
+  $container.append(items);
+  if ((ref = $container.get(0).perfectscrollbar) != null) {
+    ref.update();
+  }
+  if (items.length === 1) {
+    return selectAirportListItem($container.find('.item'), 'dont-scroll');
+  }
 };
 
 updateSelectionInfo = function() {
   return setTimeout(function() {
-    var $container, items_html;
+    var $button, $container, items, items_html;
+    $button = $('.foot [data-action="select-tour"]');
     $container = $ctx.find('.foot .selection-info').empty();
-    items_html = $ctx.find('.data-column .item.selected').toArray().map(function(item) {
+    items = $ctx.find('.data-column .item.selected').toArray().map(function(item) {
       var $item;
       $item = $(item);
       if ($item.children().length) {
@@ -258,19 +285,20 @@ updateSelectionInfo = function() {
       } else {
         return "<span>" + ($item.text()) + "</span>";
       }
-    }).join('');
-    return $container.append(items_html);
+    });
+    items_html = items.join('');
+    $container.append(items_html);
+    if (items.length === 3) {
+      return $button.removeAttr('disabled');
+    } else {
+      return $button.attr({
+        disabled: 'disabled'
+      });
+    }
   }, 1000);
 };
 
-LOCAL_GET_CACHE = {
-  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2671': '[{"Id":1,"Name":"Турция"},{"Id":3,"Name":"Россия"},{"Id":12,"Name":"Египет"},{"Id":31,"Name":"ОАЭ"},{"Id":33,"Name":"Таиланд"},{"Id":282,"Name":"Бахрейн"},{"Id":52,"Name":"Индия"},{"Id":35,"Name":"Мальдивы"},{"Id":40,"Name":"Шри-Ланка"},{"Id":60,"Name":"Танзания"},{"Id":41,"Name":"Вьетнам"},{"Id":39,"Name":"Сейшелы"},{"Id":63,"Name":"Маврикий"},{"Id":278,"Name":"Абхазия"},{"Id":7,"Name":"Азербайджан"},{"Id":5,"Name":"Армения"},{"Id":8,"Name":"Беларусь"},{"Id":49,"Name":"Узбекистан"},{"Id":36,"Name":"Доминиканская Республика"},{"Id":98,"Name":"Мексика"},{"Id":38,"Name":"Индонезия"},{"Id":72,"Name":"Андорра"},{"Id":42,"Name":"Испания"},{"Id":18,"Name":"Италия"},{"Id":216,"Name":"Кипр"},{"Id":108,"Name":"Хорватия"},{"Id":10,"Name":"Болгария"},{"Id":80,"Name":"Черногория"},{"Id":48,"Name":"Куба"}]',
-  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2328': '[{"Id":3,"Name":"Россия"},{"Id":278,"Name":"Абхазия"}]',
-  'https://www.coral.ru/v1/geography/tocountryfilter?areaid=2449': '[{"Id":1,"Name":"Турция"},{"Id":3,"Name":"Россия"},{"Id":12,"Name":"Египет"},{"Id":31,"Name":"ОАЭ"},{"Id":33,"Name":"Таиланд"},{"Id":282,"Name":"Бахрейн"},{"Id":52,"Name":"Индия"},{"Id":35,"Name":"Мальдивы"},{"Id":40,"Name":"Шри-Ланка"},{"Id":39,"Name":"Сейшелы"},{"Id":63,"Name":"Маврикий"},{"Id":278,"Name":"Абхазия"},{"Id":7,"Name":"Азербайджан"},{"Id":5,"Name":"Армения"},{"Id":8,"Name":"Беларусь"},{"Id":49,"Name":"Узбекистан"},{"Id":38,"Name":"Индонезия"}]',
-  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2671&toCountryId=1': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area63","ToAreaName":"Стамбул (Istanbul)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area5","ToAreaName":"Анталья (Antalya)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area26","ToAreaName":"Измир (Izmir)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area3264","ToAreaName":"Даламан (Dalaman)"},{"FlightDate":"\\/Date(1672185600000)\\/","ToAreaId":"Area44","ToAreaName":"Кайсери (Kayseri)"},{"FlightDate":"\\/Date(1672272000000)\\/","ToAreaId":"Area14","ToAreaName":"Эрзурум (Erzurum)"},{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area1","ToAreaName":"Бодрум (Bodrum)"}],"ErrorMessage":null}',
-  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2671&toCountryId=35': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area271","ToAreaName":"Мале (Male)"}],"ErrorMessage":null}',
-  'https://www.coral.ru/v1/flight/availabledate?fromAreaId=2449&toCountryId=35': '{"IsSuccess":true,"Result":[{"FlightDate":"\\/Date(1670025600000)\\/","ToAreaId":"Area271","ToAreaName":"Мале (Male)"}],"ErrorMessage":null}'
-};
+LOCAL_GET_CACHE = {};
 
 ajaxGet = function(endpoint, req_params) {
   var $promise, request_uri;
@@ -286,6 +314,28 @@ ajaxGet = function(endpoint, req_params) {
   return $promise;
 };
 
+fetchDestinationWithFallback = function(primary_id, fallback_id) {
+  var $promise;
+  $promise = $.Deferred();
+  $.get('/v1/destination/destinationbyid', {
+    destinationId: primary_id
+  }).done(function(destination_response) {
+    var destination;
+    destination = destination_response.Item;
+    if (destination) {
+      return $promise.resolve(destination);
+    } else {
+      return $.get('/v1/destination/destinationbyid', {
+        destinationId: fallback_id
+      }).done(function(destination_response) {
+        destination = destination_response.Item;
+        return $promise.resolve(destination);
+      });
+    }
+  });
+  return $promise;
+};
+
 $ctx = null;
 
 ASAP(function() {
@@ -294,11 +344,19 @@ ASAP(function() {
   responsiveHandler('(max-width: 768px)', function() {
     var $headitems;
     $headitems = $('.head-item', $ctx);
-    return $('.data-column', $ctx).each(function(idx, el) {
+    $('.data-column', $ctx).each(function(idx, el) {
       return $(el).prepend($headitems.eq(idx));
     });
+    return $('.data-column .scrollable').each(function(idx, el) {
+      var ref;
+      return (ref = el.perfectscrollbar) != null ? ref.update() : void 0;
+    });
   }, function() {
-    return $('.head', $ctx).append($('.head-item', $ctx));
+    $('.head', $ctx).append($('.head-item', $ctx));
+    return $('.data-column .scrollable').each(function(idx, el) {
+      var ref;
+      return (ref = el.perfectscrollbar) != null ? ref.update() : void 0;
+    });
   });
   nodes_array = $('.geolocation-list li').map(function(idx, li) {
     var $li;
@@ -329,11 +387,92 @@ ASAP(function() {
     $(document).on('click', '.data-column.depart-from .item', function(e) {
       return selectOriginItem(this, 'dont_fallback');
     });
-    return $(document).on('click', '.data-column.destination-to .item', function(e) {
+    $(document).on('click', '.data-column.destination-to .item', function(e) {
       var $this;
       $this = $(this);
       $this.closest('.data-column').attr('data-preferred-destination', $this.text());
       return selectDestinationItem($this, 'dont-scroll');
+    });
+    $(document).on('click', '.data-column.destination-airport-closest-date .item', function(e) {
+      var $this;
+      $this = $(this);
+      return selectAirportListItem($this, 'dont-scroll');
+    });
+    return $('[data-action="select-tour"]').on('click', function(e) {
+      var $airport_item, $departure_item, destinationCountryId, flight_moment, fromAreaId, fromAreaLabel, to_area_id;
+      window.global.travelloader.show();
+      $departure_item = $('.data-column.depart-from .item.selected');
+      fromAreaId = $departure_item.attr('data-departureid');
+      fromAreaLabel = $departure_item.text();
+      destinationCountryId = $('.data-column.destination-to .item.selected').attr('data-id');
+      $airport_item = $('.data-column.destination-airport-closest-date .item.selected');
+      to_area_id = $airport_item.attr('data-toareaid');
+      flight_moment = moment(Number($airport_item.attr('data-flight-timestamp')));
+      return fetchDestinationWithFallback(to_area_id, "Country" + destinationCountryId).done(function(destination_response) {
+        var destination;
+        destination = destination_response;
+        return $.ajax('/v1/flight/availablenights', {
+          data: {
+            fromAreaId: fromAreaId,
+            destinationId: destination.Id,
+            toCountryId: destinationCountryId,
+            toAreaId: '',
+            toPlaceId: '',
+            nearestAirports: destination.NearestAirports.join(','),
+            beginDate: flight_moment.format('YYYY-MM-DD'),
+            endDate: flight_moment.format('YYYY-MM-DD'),
+            flightType: ''
+          }
+        }).then(function(available_nights_response) {
+          var nights;
+          if (available_nights_response.Result.length) {
+            nights = available_nights_response.Result.slice().filter(function(n) {
+              return n !== 1;
+            }).sort(function(a, b) {
+              var va, vb;
+              va = Math.abs(7 - a);
+              vb = Math.abs(7 - b);
+              if (va < vb) {
+                return -1;
+              } else {
+                if (va > vb) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              }
+            }).slice(0, 3).sort(function(a, b) {
+              return a - b;
+            });
+            return $.ajax('/v1/package/search', {
+              method: 'post',
+              data: {
+                isCharter: true,
+                isRegular: true,
+                Guest: {
+                  Adults: 2
+                },
+                SelectedDate: flight_moment.format('YYYY-MM-DD'),
+                DateRange: 0,
+                BeginDate: flight_moment.format('YYYY-MM-DD'),
+                EndDate: flight_moment.format('YYYY-MM-DD'),
+                Acc: nights,
+                Departures: [
+                  {
+                    Id: fromAreaId,
+                    Label: fromAreaLabel
+                  }
+                ],
+                Destination: [destination]
+              }
+            }).then(function(package_search_response) {
+              return location.href = package_search_response;
+            });
+          } else {
+            return alert('No accomodation options avaiilable (nights)');
+          }
+        });
+      });
     });
   });
 });

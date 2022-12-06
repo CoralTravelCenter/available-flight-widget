@@ -65,6 +65,8 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
 }
 @media screen and (max-width: 768px) {
   .available-flight-widget .head-item {
+    position: relative;
+    z-index: 1;
     background-color: white;
     margin: 0;
     padding: 1em;
@@ -113,6 +115,7 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
 @media screen and (max-width: 768px) {
   .available-flight-widget .body {
     display: block;
+    padding-bottom: 1em;
   }
 }
 .available-flight-widget .body .data-column {
@@ -171,6 +174,13 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   border-radius: 0 0 1em 1em;
   font-weight: bold;
 }
+@media screen and (max-width: 768px) {
+  .available-flight-widget .foot {
+    border-radius: 1em;
+    margin-top: -1em;
+    filter: drop-shadow(0 0 0.5em rgba(0, 0, 0, 0.15));
+  }
+}
 .available-flight-widget .foot .pad {
   width: 100%;
   display: flex;
@@ -179,9 +189,23 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   padding-top: 1em;
   border-top: 1px solid #dedede;
 }
+@media screen and (max-width: 768px) {
+  .available-flight-widget .foot .pad {
+    flex-direction: column;
+    align-items: center;
+    border: 0;
+  }
+}
 .available-flight-widget .foot .pad .selection-info-comp {
   display: flex;
   align-items: baseline;
+}
+@media screen and (max-width: 768px) {
+  .available-flight-widget .foot .pad .selection-info-comp {
+    flex-direction: column;
+    align-items: center;
+    margin: 1em auto;
+  }
 }
 .available-flight-widget .foot .pad .selection-info-comp .label {
   margin-right: 1em;
@@ -190,9 +214,19 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   display: flex;
   align-items: center;
 }
+@media screen and (max-width: 768px) {
+  .available-flight-widget .foot .pad .selection-info-comp .selection-info {
+    margin-top: 1em;
+  }
+}
 .available-flight-widget .foot .pad .selection-info-comp .selection-info > * {
   display: inline-flex;
   align-items: center;
+}
+@media screen and (max-width: 768px) {
+  .available-flight-widget .foot .pad .selection-info-comp .selection-info > * {
+    line-height: 1.2;
+  }
 }
 .available-flight-widget .foot .pad .selection-info-comp .selection-info > *:nth-child(n+2):before {
   content: '>';
@@ -205,6 +239,7 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  outline: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -215,6 +250,12 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   color: white;
   background-color: #F0AB00;
   border: 0;
+  cursor: pointer;
+  -webkit-transition: opacity 0.5s, background 0.5s;
+  -moz-transition: opacity 0.5s, background 0.5s;
+  -ms-transition: opacity 0.5s, background 0.5s;
+  -o-transition: opacity 0.5s, background 0.5s;
+  transition: opacity 0.5s, background 0.5s;
 }
 .available-flight-widget .foot .pad [data-action='select-tour']:active {
   -webkit-transform: translateY(2px);
@@ -222,6 +263,11 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
   -ms-transform: translateY(2px);
   -o-transform: translateY(2px);
   transform: translateY(2px);
+}
+.available-flight-widget .foot .pad [data-action='select-tour'][disabled] {
+  pointer-events: none;
+  background-color: #999;
+  opacity: 0.5;
 }
 .ps__rail-y {
   opacity: 1!important;

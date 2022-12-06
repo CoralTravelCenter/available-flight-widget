@@ -31,6 +31,8 @@
 		margin: @pad-base 0;
 		display: flex;
 		@media screen and (max-width: @mobile-breakpoint) {
+			position: relative;
+			z-index: 1;
 			background-color: white;
 			margin: 0;
 			padding: @pad-base;
@@ -77,6 +79,7 @@
 		margin-top: -@pad-base;
 		@media screen and (max-width: @mobile-breakpoint) {
 		    display: block;
+			padding-bottom: @pad-base;
 		}
 		.data-column {
 			flex: 0 0 25%;
@@ -126,6 +129,11 @@
 		padding: 0 @pad-base @pad-base;
 		border-radius: 0 0 @pad-base @pad-base;
 		font-weight: bold;
+		@media screen and (max-width: @mobile-breakpoint) {
+		    border-radius: @pad-base;
+			margin-top: -@pad-base;
+			filter: drop-shadow(0 0 0.5em rgba(0,0,0,.15));
+		}
 		.pad {
 			width: 100%;
 			display: flex;
@@ -133,18 +141,34 @@
 			align-items: center;
 			padding-top: @pad-base;
 			border-top: 1px solid #dedede;
+			@media screen and (max-width: @mobile-breakpoint) {
+			    flex-direction: column;
+				align-items: center;
+				border: 0;
+			}
 			.selection-info-comp {
 				display: flex;
 				align-items: baseline;
+				@media screen and (max-width: @mobile-breakpoint) {
+					flex-direction: column;
+					align-items: center;
+					margin: 1em auto;
+				}
 				.label {
 					margin-right: 1em;
 				}
 				.selection-info {
 					display: flex;
 					align-items: center;
+					@media screen and (max-width: @mobile-breakpoint) {
+						margin-top: @pad-base;
+					}
 					>* {
 						display: inline-flex;
 						align-items: center;
+						@media screen and (max-width: @mobile-breakpoint) {
+							line-height: 1.2;
+						}
 						&:nth-child(n+2) {
 							&:before {
 								content: '>';
@@ -158,6 +182,7 @@
 			}
 			[data-action='select-tour'] {
 				.interactive;
+				outline: none;
 				.flex-center;
 				line-height: 1;
 				height: 2.6em;
@@ -166,6 +191,14 @@
 				color: white;
 				background-color: #F0AB00;
 				border: 0;
+				cursor: pointer;
+				.transit(opacity);
+				.transit(background);
+				&[disabled] {
+					pointer-events: none;
+					background-color: #999;
+					opacity: .5;
+				}
 			}
 		}
 	}
