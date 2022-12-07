@@ -470,7 +470,8 @@ ASAP(function() {
               return location.href = package_search_response;
             });
           } else {
-            return alert('No accomodation options avaiilable (nights)');
+            alert('Нет вариантов размещения');
+            return window.global.travelloader.hide();
           }
         });
       });

@@ -283,4 +283,5 @@ ASAP ->
                             .then (package_search_response) ->
                                 location.href = package_search_response
                         else
-                            alert 'No accomodation options avaiilable (nights)'
+                            alert 'Нет вариантов размещения'
+                            window.global.travelloader.hide()
