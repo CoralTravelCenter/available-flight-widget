@@ -171,7 +171,9 @@ ajaxGet = (endpoint, req_params) ->
     if LOCAL_GET_CACHE[request_uri]
         $promise.resolve(if typeof LOCAL_GET_CACHE[request_uri] == 'string' then JSON.parse(LOCAL_GET_CACHE[request_uri]) else LOCAL_GET_CACHE[request_uri])
     else
-        $.ajax(request_uri).then (response) -> $promise.resolve(response)
+        $.ajax(request_uri).then (response) ->
+            LOCAL_GET_CACHE[request_uri] = response
+            $promise.resolve(response)
     $promise
 
 fetchDestinationWithFallback = (primary_id, fallback_id) ->

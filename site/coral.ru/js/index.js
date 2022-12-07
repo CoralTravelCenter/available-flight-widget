@@ -308,6 +308,7 @@ ajaxGet = function(endpoint, req_params) {
     $promise.resolve(typeof LOCAL_GET_CACHE[request_uri] === 'string' ? JSON.parse(LOCAL_GET_CACHE[request_uri]) : LOCAL_GET_CACHE[request_uri]);
   } else {
     $.ajax(request_uri).then(function(response) {
+      LOCAL_GET_CACHE[request_uri] = response;
       return $promise.resolve(response);
     });
   }
