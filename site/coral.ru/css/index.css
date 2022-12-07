@@ -22,7 +22,7 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
 .available-flight-widget {
   width: 100%;
   max-width: 1370px;
-  margin: auto;
+  margin: 5% auto;
   font-size: 1.15vw;
   font-weight: normal;
 }
@@ -43,6 +43,7 @@ body > div.contentLayout-BaseContainer > div.notcritical > div > div:nth-child(2
 @media screen and (max-width: 768px) {
   .available-flight-widget {
     font-size: 3vw;
+    margin: 10% auto;
   }
 }
 .available-flight-widget .head {
