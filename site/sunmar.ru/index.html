@@ -1,13 +1,35 @@
 <body>
 <link rel="stylesheet" href="css/index.css">
-
-<div id="site-wrap">
-
-    <section>
-        <div class="contenu">
-            <h2>Sunmar</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.5/css/perfect-scrollbar.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div class="available-flight-widget" data-preferred-destination="Индия">
+    <div class="head">
+        <div class="head-item"><span class="labeled takeoff">Выберите город вылета</span></div>
+        <div class="head-item"><span class="labeled destination">Выберите страну</span></div>
+        <div class="head-item dbl">
+            <span class="labeled landing">Аэропорт прилета</span>
+            <span class="labeled closest-date">Ближайший вылет</span>
         </div>
-    </section>
+    </div>
+    <div class="body">
+        <div class="data-column depart-from">
+            <div class="scrollable"><!--...--></div>
+        </div>
+        <div class="data-column destination-to">
+            <div class="scrollable"><!--...--></div>
+        </div>
+        <div class="data-column dbl destination-airport-closest-date">
+            <div class="scrollable"><!--...--></div>
+        </div>
+    </div>
+    <div class="foot">
+        <div class="pad">
+            <div class="selection-info-comp">
+                <span class="label">Вы выбрали:</span>
+                <div class="selection-info"><!--...--></div>
+            </div>
+            <button data-action="select-tour" disabled>Выбрать тур</button>
+        </div>
+    </div>
 
 </div>
 
